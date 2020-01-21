@@ -1,16 +1,19 @@
 const express = require("express");
+const morgan = require("morgan");
+
+const tourRouter = require("./routes/tourRoutes.js");
+const userRouter = require("./routes/userRoutes.js");
 
 const app = express();
-const PORT = 3000;
 
-app.get("/", (req, res, next) => {
-  res.status(200).json({ message: "Hello from the server side..." });
-});
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+app.use(express.json());
+app.use(express.static(`${__dirname}/public`));
 
-app.post("/", (req, res, next) => {
-  res.send("You can post to this end point");
-});
+app.use("/api/v1/tours", tourRouter);
+app.use("/api/v1/users", userRouter);
 
-app.listen(PORT, () => {
-  console.log(`App running on port ${PORT}...`);
-});
+module.exports = app;
