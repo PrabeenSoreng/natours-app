@@ -15,10 +15,15 @@ router.patch(
   authController.protect,
   authController.updatePassword
 );
+router.patch("/updateMe", authController.protect, userController.updateMe);
 
 router
   .route("/")
-  .get(userController.getAllUsers)
+  .get(
+    authController.protect,
+    authController.restrictTo("admin"),
+    userController.getAllUsers
+  )
   .post(userController.createUser);
 
 router
