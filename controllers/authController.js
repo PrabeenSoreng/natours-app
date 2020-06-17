@@ -6,32 +6,33 @@ const AppError = require("../utils/appError.js");
 const catchAsync = require("../utils/catchAsync.js");
 const sendEmail = require("../utils/email.js");
 
-const signToken = id => {
+const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRESIN
+    expiresIn: process.env.JWT_EXPIRESIN,
   });
 };
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
-    expiresIn: new Date(
+    expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRESIN * 24 * 60 * 60 * 1000
     ),
     // secure: true,
-    httpOnly: true
+    httpOnly: true,
   };
 
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
 
   res.cookie("jwt", token, cookieOptions);
+  user.password = undefined;
 
   res.status(statusCode).json({
     status: "success",
     token,
     data: {
-      user
-    }
+      user,
+    },
   });
 };
 
@@ -41,7 +42,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     role: req.body.role,
     password: req.body.password,
-    confirmPassword: req.body.confirmPassword
+    confirmPassword: req.body.confirmPassword,
   });
 
   createSendToken(newUser, 201, res);
@@ -156,12 +157,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await sendEmail({
       email: user.email,
       subject: "Your password reset token, only valid for few minutes...",
-      message
+      message,
     });
 
     res.status(200).json({
       status: "success",
-      message: "Token send to the mail"
+      message: "Token send to the mail",
     });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -185,7 +186,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
+    passwordResetExpires: { $gt: Date.now() },
   });
 
   // 2. If token has not expired, and there is a user, set the new password.
