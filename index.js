@@ -10,6 +10,7 @@ const AppError = require("./utils/appError.js");
 const globalErrorHandler = require("./controllers/errorController.js");
 const tourRouter = require("./routes/tourRoutes.js");
 const userRouter = require("./routes/userRoutes.js");
+const reviewRouter = require("./routes/reviewRoutes.js");
 
 const app = express();
 
@@ -28,7 +29,7 @@ if (process.env.NODE_ENV === "development") {
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
-  message: "Too many requests from this IP, please try again in an hour..."
+  message: "Too many requests from this IP, please try again in an hour...",
 });
 app.use("/api", limiter);
 
@@ -50,8 +51,8 @@ app.use(
       "ratingsAverage",
       "maxGroupSize",
       "difficulty",
-      "price"
-    ]
+      "price",
+    ],
   })
 );
 
@@ -60,6 +61,7 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 app.all("*", (req, res, next) => {
   // res.status(404).json({
