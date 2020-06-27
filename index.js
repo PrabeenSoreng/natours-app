@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -14,7 +15,12 @@ const reviewRouter = require("./routes/reviewRoutes.js");
 
 const app = express();
 
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
 // Global Middlewares
+// Serving static files
+app.use(express.static(path.join(__dirname, "public")));
 
 // Security HTTP headers
 app.use(helmet());
@@ -56,8 +62,12 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
+app.get("/", (req, res, next) => {
+  res.status(200).render("base", {
+    tour: "The Forest Hiker",
+    user: "Jonas",
+  });
+});
 
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
