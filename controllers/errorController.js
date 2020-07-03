@@ -30,30 +30,50 @@ module.exports = (error, req, res, next) => {
   error.status = error.status || "error";
 
   if (process.env.NODE_ENV === "development") {
-    res.status(error.statusCode).json({
-      status: error.status,
-      error: error,
-      message: error.message,
-      stack: error.stack,
+    if (req.originalUrl.startsWith("/api")) {
+      return res.status(error.statusCode).json({
+        status: error.status,
+        error: error,
+        message: error.message,
+        stack: error.stack,
+      });
+    }
+    console.error("ERROR ", error);
+    return res.status(error.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: error.message,
     });
   } else if (process.env.NODE_ENV === "production") {
     let err = { ...error };
+    err.message = error.message;
     if (err.name === "CastError") err = handleCastErrorDB(err);
     if (err.code === 11000) err = handleDuplicateFieldsDB(err);
     if (err.name === "ValidationError") err = handleValidationErrorDB(err);
     if (err.name === "JsonWebTokenError") err = handleJWTError(err);
     if (err.name === "TokenExpiredError") err = handleJWTExpiredError(err);
-    if (err.isOperational) {
-      res.status(err.statusCode).json({
-        status: err.status,
-        message: err.mesage,
-      });
-    } else {
+    if (req.originalUrl.startsWith("/api")) {
+      if (err.isOperational) {
+        return res.status(err.statusCode).json({
+          status: err.status,
+          message: err.mesage,
+        });
+      }
       console.error("ERROR ", err);
-      res.status(500).json({
+      return res.status(500).json({
         status: "error",
         message: "Something went wrong!!!",
       });
     }
+    if (err.isOperational) {
+      return res.status(error.statusCode).render("error", {
+        title: "Something went wrong!",
+        msg: error.message,
+      });
+    }
+    console.error("ERROR ", err);
+    return res.status(error.statusCode).render("error", {
+      title: "Something went wrong!",
+      msg: "Please try again later.",
+    });
   }
 };
