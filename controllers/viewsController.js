@@ -31,11 +31,17 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getLoginForm = catchAsync(async (req, res, next) => {
+exports.getSignupForm = (req, res, next) => {
+  res.status(200).render("signup", {
+    title: "Signup",
+  });
+};
+
+exports.getLoginForm = (req, res, next) => {
   res.status(200).render("login", {
     title: "Login",
   });
-});
+};
 
 exports.getAccount = (req, res, next) => {
   res.status(200).render("account", {
