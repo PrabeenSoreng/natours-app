@@ -4,6 +4,15 @@ const Tour = require("../models/tourModel.js");
 const catchAsync = require("../utils/catchAsync.js");
 const AppError = require("../utils/appError.js");
 
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+  if (alert === "booking")
+    res.locals.alert =
+      "Your booking was successful! Please check your email for confirmation. If your booking doesn't show up immediately, please come back later.";
+
+  next();
+};
+
 exports.getOverview = catchAsync(async (req, res, next) => {
   // 1. Get tour data from collection
   const tours = await Tour.find();
